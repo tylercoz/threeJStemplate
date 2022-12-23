@@ -1,44 +1,42 @@
 import * as THREE from 'three'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 
+/** threejs template */
+
+/** SCENE */
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xffffff);
 
-const directionalLight = new THREE.DirectionalLight( 0xffffff, 0.5 );
-scene.add( directionalLight );
-directionalLight.position.set(1, 1, 0);
-
+/** CAMERA */
 const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
 camera.position.z = 5;
 
+/** RENDERER */
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize( window.innerWidth, window.innerHeight );
-renderer.outputEncoding = THREE.sRGBEncoding;
 document.body.appendChild( renderer.domElement );
 
-const geometry = new THREE.BoxGeometry( 1, 1, 1 );
-const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-const cube = new THREE.Mesh( geometry, material );
-// scene.add( cube );
+function render() {
+  renderer.render( scene, camera );
+}
 
-const loader = new GLTFLoader();
-loader.load('Assets/donut.glb', (gltf) => {
-  scene.add(gltf.scene);
-  render();
-})
+/** OBJECTS */
+const cube = new THREE.Mesh(
+  new THREE.BoxGeometry(1, 1, 1),
+  new THREE.MeshBasicMaterial( {color: 0x00ff00} )
+);
+scene.add(cube);
 
+/** CONTROLS */
 const controls = new OrbitControls(camera, renderer.domElement);
 
+/** ANIMATE */
 function animate() {
   requestAnimationFrame( animate );
+
+  cube.rotation.x += 0.01;
+	cube.rotation.y += 0.01;
 
   render();
 };
 
 animate();
-
-
-function render() {
-  renderer.render( scene, camera );
-}
