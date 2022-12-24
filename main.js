@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { DoubleSide } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 
 /** threejs template */
@@ -20,11 +21,29 @@ function render() {
 }
 
 /** OBJECTS */
-const cube = new THREE.Mesh(
-  new THREE.BoxGeometry(1, 1, 1),
-  new THREE.MeshBasicMaterial( {color: 0x00ff00} )
+const plane = new THREE.Mesh(
+  new THREE.PlaneGeometry(1, 1, 1),
+  new THREE.MeshBasicMaterial( {color: 0x00ff00, side: DoubleSide} )
 );
-scene.add(cube);
+scene.add(plane);
+
+/** cover with quad */
+/** FIX */
+() => {
+  const dist = this.camera.position.z;
+  const height = 1;
+  this.camera.fov = 2*(180*Math.PI)*Math.atan(height/(2*dist));
+
+  if (window.innerWidth/window.innerHeight > 1) {
+    plane.scale.x = camera.aspect;
+  }
+  else {
+    plane.scale.y = 1 / camera.aspect;
+  }
+
+  camera.updateProjectionMatrix();
+
+}
 
 /** CONTROLS */
 const controls = new OrbitControls(camera, renderer.domElement);
@@ -32,9 +51,6 @@ const controls = new OrbitControls(camera, renderer.domElement);
 /** ANIMATE */
 function animate() {
   requestAnimationFrame( animate );
-
-  cube.rotation.x += 0.01;
-	cube.rotation.y += 0.01;
 
   render();
 };
