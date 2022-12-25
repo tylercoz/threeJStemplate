@@ -42,17 +42,32 @@ const plane = new THREE.Mesh(
       uniform vec2 resolution;
       vec2 col;
 
+      struct Blob {
+        vec2 position;
+        float radius;
+        vec2 velocity;
+      };
+  
+      Blob[10] blobs;
+  
+
       void main() {
-        //uv coords range from 0. to 1.
+        //x: 0 -> 2, y: = -> 1
         //divide by y to account for aspect ratio being off (rectangle shape, render squarely)
-        vec2 uv = ((gl_FragCoord.xy/resolution.y)/2.);
+        vec2 uv = (gl_FragCoord.xy/resolution.y) / 2.;
         
-        //centers
-        uv.x -= .5;
+        //center uv
+        // uv.x -= .5;
+
+        for (int i = 0; i < blobs.length(); i++) {
+          blobs[i] = Blob(vec2(.5), .1, vec2(.1, .3));
+        }
 
 
         //distance function
-        col.x = distance(uv, vec2(.5));
+        float d = distance(uv, blobs[0].position);
+        col.x = blobs[0].radius / d;
+
 
         gl_FragColor = vec4(col, 0., 1.0);
       }
