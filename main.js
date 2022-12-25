@@ -2,6 +2,12 @@ import * as THREE from 'three'
 import { DoubleSide } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 
+let blobs = [];
+const Blob = {
+  position: new THREE.Vector2(Math.random() * 2, Math.random()),
+}
+blobs[0] = Blob;
+
 /** SCENE */
 const scene = new THREE.Scene();
 
@@ -28,11 +34,18 @@ const plane = new THREE.Mesh(
         type: 'f',
         value: new THREE.Vector2(visualViewport.width, visualViewport.height)
       },
+      random: {
+        type: 'f',
+        value: [Math.random(), Math.random(), Math.random(), Math.random(), Math.random(),
+                Math.random(), Math.random(), Math.random(), Math.random(), Math.random()]
+      },
+      blobs: {
+        value: blobs,
+      },
      },
     vertexShader:
       `
       void main() {
-
         vec4 modelViewPosition = modelViewMatrix * vec4(position, 1.0);
         gl_Position = projectionMatrix * modelViewPosition; 
       }
@@ -41,20 +54,12 @@ const plane = new THREE.Mesh(
     `
       uniform vec2 resolution;
       vec2 col;
-
+    
       struct Blob {
         vec2 position;
-        float radius;
-        vec2 velocity;
       };
-  
-      Blob[10] blobs;
 
-      //WORK ON RANDOM BLOBS!!! 
-      float rand(vec2 co){
-        return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
-      }
-
+      uniform Blob blobs;
 
       void main() {
         //x: 0 -> 2, y: = -> 1
@@ -64,19 +69,17 @@ const plane = new THREE.Mesh(
         //center uv
         // uv.x -= .5;
 
-        //populate blobs
-        for (int i = 0; i < blobs.length(); i++) {
-          vec2 p = vec2(rand(vec2(1, 2)), rand(vec2(i, i)));
-          blobs[i] = Blob(p, .1, vec2(.1, .3));
-        }
-
-
         //distance function
-        float d = distance(uv, blobs[0].position);
-        col.x = blobs[0].radius / d;
+        // float total = 0.;
+        // for (int i = 0; i < blobs.length(); i++) {
+        //   float d = distance(uv, blobs[i].position);
+        //   total += blobs[i].radius / d;
+        // }
+        // col.x = total;
 
+        col = uv;
 
-        gl_FragColor = vec4(col, 0., 1.0);
+        gl_FragColor = vec4(col, .5, 1.0);
       }
     `,
   })
