@@ -20,33 +20,76 @@ function render() {
   renderer.render( scene, camera );
 }
 
+function vertexShader() {
+  return `
+    varying vec3 vUv; 
+
+    void main() {
+      vUv = position; 
+
+      vec4 modelViewPosition = modelViewMatrix * vec4(position, 1.0);
+      gl_Position = projectionMatrix * modelViewPosition; 
+    }
+  `
+}
+
+function fragmentShader() {
+  return `
+    uniform vec3 colorA; 
+    uniform vec3 colorB; 
+    varying vec3 vUv;
+
+    void main() {
+      gl_FragColor = vec4(mix(colorA, colorB, vUv.z), 1.0);
+    }
+  `
+}
+
 /** OBJECTS */
 const plane = new THREE.Mesh(
-  new THREE.PlaneGeometry(1, 1, 1),
-  new THREE.MeshBasicMaterial( {color: 0x00ff00, side: DoubleSide} )
+  new THREE.PlaneGeometry(1, 1),
+  new THREE.ShaderMaterial({
+    // uniforms: {},
+    vertexShader:
+      `
+      varying vec3 vUv; 
+
+      void main() {
+        vUv = position; 
+
+        vec4 modelViewPosition = modelViewMatrix * vec4(position, 1.0);
+        gl_Position = projectionMatrix * modelViewPosition; 
+      }
+    `,
+    fragmentShader:
+    `
+      varying vec3 vUv;
+
+      void main() {
+        gl_FragColor = vec4(0., .8, .5, 1.0);
+      }
+    `,
+  })
 );
 scene.add(plane);
 
 /** cover with quad */
 /** FIX */
-() => {
-  const dist = this.camera.position.z;
-  const height = 1;
-  this.camera.fov = 2*(180*Math.PI)*Math.atan(height/(2*dist));
+const dist = camera.position.z;
+const height = 1;
+camera.fov = 2*(180/Math.PI)*Math.atan(height/(2*dist));
 
-  if (window.innerWidth/window.innerHeight > 1) {
-    plane.scale.x = camera.aspect;
-  }
-  else {
-    plane.scale.y = 1 / camera.aspect;
-  }
-
-  camera.updateProjectionMatrix();
-
+if (window.innerWidth/window.innerHeight > 1) {
+  plane.scale.x = camera.aspect;
+}
+else {
+  plane.scale.y = 1 / camera.aspect;
 }
 
+camera.updateProjectionMatrix();
+
 /** CONTROLS */
-const controls = new OrbitControls(camera, renderer.domElement);
+// const controls = new OrbitControls(camera, renderer.domElement);
 
 /** ANIMATE */
 function animate() {
