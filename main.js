@@ -49,7 +49,12 @@ const plane = new THREE.Mesh(
       };
   
       Blob[10] blobs;
-  
+
+      //WORK ON RANDOM BLOBS!!! 
+      float rand(vec2 co){
+        return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
+      }
+
 
       void main() {
         //x: 0 -> 2, y: = -> 1
@@ -59,8 +64,10 @@ const plane = new THREE.Mesh(
         //center uv
         // uv.x -= .5;
 
+        //populate blobs
         for (int i = 0; i < blobs.length(); i++) {
-          blobs[i] = Blob(vec2(.5), .1, vec2(.1, .3));
+          vec2 p = vec2(rand(vec2(1, 2)), rand(vec2(i, i)));
+          blobs[i] = Blob(p, .1, vec2(.1, .3));
         }
 
 
