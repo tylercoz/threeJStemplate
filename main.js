@@ -2,8 +2,6 @@ import * as THREE from 'three'
 import { DoubleSide } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 
-/** threejs template */
-
 /** SCENE */
 const scene = new THREE.Scene();
 
@@ -20,36 +18,16 @@ function render() {
   renderer.render( scene, camera );
 }
 
-function vertexShader() {
-  return `
-    varying vec3 vUv; 
-
-    void main() {
-      vUv = position; 
-
-      vec4 modelViewPosition = modelViewMatrix * vec4(position, 1.0);
-      gl_Position = projectionMatrix * modelViewPosition; 
-    }
-  `
-}
-
-function fragmentShader() {
-  return `
-    uniform vec3 colorA; 
-    uniform vec3 colorB; 
-    varying vec3 vUv;
-
-    void main() {
-      gl_FragColor = vec4(mix(colorA, colorB, vUv.z), 1.0);
-    }
-  `
-}
-
 /** OBJECTS */
 const plane = new THREE.Mesh(
   new THREE.PlaneGeometry(1, 1),
   new THREE.ShaderMaterial({
-    // uniforms: {},
+    uniforms: {
+      resolution: {
+        type: 'f',
+        value: new THREE.Vector2(visualViewport.width, visualViewport.height)
+      },
+     },
     vertexShader:
       `
       varying vec3 vUv; 
@@ -64,9 +42,13 @@ const plane = new THREE.Mesh(
     fragmentShader:
     `
       varying vec3 vUv;
+      uniform vec2 resolution;
+      vec2 col;
 
       void main() {
-        gl_FragColor = vec4(0., .8, .5, 1.0);
+        //uv coords range from 0. to 1.
+        vec2 uv = vec2(vUv) + vec2(.5);
+        gl_FragColor = vec4(uv, 0., 1.0);
       }
     `,
   })
@@ -89,7 +71,7 @@ else {
 camera.updateProjectionMatrix();
 
 /** CONTROLS */
-// const controls = new OrbitControls(camera, renderer.domElement);
+const controls = new OrbitControls(camera, renderer.domElement);
 
 /** ANIMATE */
 function animate() {
