@@ -11,6 +11,7 @@ camera.position.z = 5;
 
 /** RENDERER */
 const renderer = new THREE.WebGLRenderer();
+renderer.setPixelRatio(devicePixelRatio);
 renderer.setSize( window.innerWidth, window.innerHeight );
 document.body.appendChild( renderer.domElement );
 
@@ -30,10 +31,7 @@ const plane = new THREE.Mesh(
      },
     vertexShader:
       `
-      varying vec3 vUv; 
-
       void main() {
-        vUv = position; 
 
         vec4 modelViewPosition = modelViewMatrix * vec4(position, 1.0);
         gl_Position = projectionMatrix * modelViewPosition; 
@@ -41,14 +39,22 @@ const plane = new THREE.Mesh(
     `,
     fragmentShader:
     `
-      varying vec3 vUv;
       uniform vec2 resolution;
       vec2 col;
 
       void main() {
         //uv coords range from 0. to 1.
-        vec2 uv = vec2(vUv) + vec2(.5);
-        gl_FragColor = vec4(uv, 0., 1.0);
+        //divide by y to account for aspect ratio being off (rectangle shape, render squarely)
+        vec2 uv = ((gl_FragCoord.xy/resolution.y)/2.);
+        
+        //centers
+        uv.x -= .5;
+
+
+        //distance function
+        col.x = distance(uv, vec2(.5));
+
+        gl_FragColor = vec4(col, 0., 1.0);
       }
     `,
   })
@@ -56,7 +62,6 @@ const plane = new THREE.Mesh(
 scene.add(plane);
 
 /** cover with quad */
-/** FIX */
 const dist = camera.position.z;
 const height = 1;
 camera.fov = 2*(180/Math.PI)*Math.atan(height/(2*dist));
@@ -71,7 +76,7 @@ else {
 camera.updateProjectionMatrix();
 
 /** CONTROLS */
-const controls = new OrbitControls(camera, renderer.domElement);
+// const controls = new OrbitControls(camera, renderer.domElement);
 
 /** ANIMATE */
 function animate() {
