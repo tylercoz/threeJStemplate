@@ -6,8 +6,8 @@ let blobs = [];
 for (let i = 0; i < 10; i++) {
   blobs[i] = {
     position: new THREE.Vector2(Math.random()  *2 ,Math.random()),
-    radius: .01,
-    velocity: new THREE.Vector2((Math.random() - .5) / 32, (Math.random() - .5) / 32),
+    radius: Math.random() / 16,
+    velocity: new THREE.Vector2((Math.random() - .5) / 80, (Math.random() - .5) / 80),
   }
 }
 
@@ -30,7 +30,7 @@ function render() {
 
 /** OBJECTS */
 const plane = new THREE.Mesh(
-  new THREE.PlaneGeometry(1, 1),
+  new THREE.PlaneGeometry(1, 1, 1),
   new THREE.ShaderMaterial({
     uniforms: {
       resolution: {
@@ -56,7 +56,7 @@ const plane = new THREE.Mesh(
     fragmentShader:
     `
       uniform vec2 resolution;
-      vec2 col;
+      vec3 col;
     
       struct Blob {
         vec2 position;
@@ -64,6 +64,13 @@ const plane = new THREE.Mesh(
       };
 
       uniform Blob[10] blobs;
+
+      // All components are in the range [0…1], including hue.
+      vec3 hsv2rgb(vec3 c) {
+        vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+        vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+        return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+      }
 
       void main() {
         //x: 0 -> 2, y: = -> 1
@@ -79,13 +86,16 @@ const plane = new THREE.Mesh(
           float d = distance(uv, blobs[i].position);
           total += blobs[i].radius / d;
         }
-        col.x = total;
 
-        // col = uv;
+        col = hsv2rgb(vec3(total , total, total));
 
-        gl_FragColor = vec4(col, .5, 1.0);
+        
+
+        gl_FragColor = vec4(col, 1.0);
       }
     `,
+    side: DoubleSide,
+    // wireframe: true,
   })
 );
 scene.add(plane);
@@ -105,7 +115,7 @@ else {
 camera.updateProjectionMatrix();
 
 /** CONTROLS */
-// const controls = new OrbitControls(camera, renderer.domElement);
+const controls = new OrbitControls(camera, renderer.domElement);
 
 /** ANIMATE */
 function animate() {
