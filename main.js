@@ -87,9 +87,13 @@ const plane = new THREE.Mesh(
           total += blobs[i].radius / d;
         }
 
-        col = vec3(floor(total));
+        col = vec3(total);
 
-        
+        if (total > 1.01) {
+          col = vec3(0.);
+        }
+
+        col = vec3(floor(col));
 
         gl_FragColor = vec4(col, 1.0);
       }
