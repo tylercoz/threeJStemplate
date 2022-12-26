@@ -3,10 +3,13 @@ import { DoubleSide } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 
 let blobs = [];
-const Blob = {
-  position: new THREE.Vector2(Math.random() * 2, Math.random()),
+for (let i = 0; i < 10; i++) {
+  blobs[i] = {
+    position: new THREE.Vector2(Math.random()  *2 ,Math.random()),
+    radius: .01,
+    velocity: new THREE.Vector2((Math.random() - .5) / 32, (Math.random() - .5) / 32),
+  }
 }
-blobs[0] = Blob;
 
 /** SCENE */
 const scene = new THREE.Scene();
@@ -57,9 +60,10 @@ const plane = new THREE.Mesh(
     
       struct Blob {
         vec2 position;
+        float radius;
       };
 
-      uniform Blob blobs;
+      uniform Blob[10] blobs;
 
       void main() {
         //x: 0 -> 2, y: = -> 1
@@ -70,14 +74,14 @@ const plane = new THREE.Mesh(
         // uv.x -= .5;
 
         //distance function
-        // float total = 0.;
-        // for (int i = 0; i < blobs.length(); i++) {
-        //   float d = distance(uv, blobs[i].position);
-        //   total += blobs[i].radius / d;
-        // }
-        // col.x = total;
+        float total = 0.;
+        for (int i = 0; i < blobs.length(); i++) {
+          float d = distance(uv, blobs[i].position);
+          total += blobs[i].radius / d;
+        }
+        col.x = total;
 
-        col = uv;
+        // col = uv;
 
         gl_FragColor = vec4(col, .5, 1.0);
       }
@@ -106,6 +110,17 @@ camera.updateProjectionMatrix();
 /** ANIMATE */
 function animate() {
   requestAnimationFrame( animate );
+
+  for (let i = 0; i < blobs.length; i++) {
+    if (blobs[i].position.x > 2.0 || blobs[i].position.x < 0) {
+      blobs[i].velocity.x = -blobs[i].velocity.x;
+    }
+    if (blobs[i].position.y > 1.0 || blobs[i].position.y < 0) {
+      blobs[i].velocity.y = -blobs[i].velocity.y;
+    }
+
+    blobs[i].position.add(blobs[i].velocity);
+  }
 
   render();
 };
