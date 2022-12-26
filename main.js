@@ -87,7 +87,7 @@ const plane = new THREE.Mesh(
           total += blobs[i].radius / d;
         }
 
-        col = hsv2rgb(vec3(total , total, total));
+        col = vec3(floor(total));
 
         
 
@@ -115,7 +115,7 @@ else {
 camera.updateProjectionMatrix();
 
 /** CONTROLS */
-const controls = new OrbitControls(camera, renderer.domElement);
+// const controls = new OrbitControls(camera, renderer.domElement);
 
 /** ANIMATE */
 function animate() {
